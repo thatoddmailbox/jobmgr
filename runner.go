@@ -36,14 +36,14 @@ func runJob(job *data.Job) (string, string, error) {
 
 	tempDir, err := os.MkdirTemp("", "jobmgr-")
 	if err != nil {
-		return "", "", err
+		return "", tempDir, err
 	}
 
 	artifactsDir := filepath.Join(tempDir, artifactsDirName)
 
 	err = os.Mkdir(artifactsDir, 0777)
 	if err != nil {
-		return "", "", err
+		return "", tempDir, err
 	}
 
 	cmd := exec.Command(jobspec.Command, jobspec.Arguments...)
@@ -51,22 +51,22 @@ func runJob(job *data.Job) (string, string, error) {
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		return "", "", err
+		return "", tempDir, err
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return "", "", err
+		return "", tempDir, err
 	}
 
 	stdout, err := io.ReadAll(stdoutPipe)
 	if err != nil {
-		return "", "", err
+		return "", tempDir, err
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		return "", "", err
+		return "", tempDir, err
 	}
 
 	return string(stdout), tempDir, nil
