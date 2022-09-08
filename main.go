@@ -40,8 +40,30 @@ func main() {
 		result, tempDir, err := runJob(job)
 		if err != nil {
 			// job failed!
-			// TODO: handle this
-			panic(err)
+			tx, err2 := data.DB.Begin()
+			if err2 != nil {
+				panic(err2)
+			}
+
+			err2 = data.InsertResult(tx, job, err.Error()+"\n\nJob directory: "+tempDir)
+			if err2 != nil {
+				tx.Rollback()
+				panic(err2)
+			}
+
+			err2 = data.MarkJobFailed(tx, job)
+			if err2 != nil {
+				tx.Rollback()
+				panic(err2)
+			}
+
+			err2 = tx.Commit()
+			if err2 != nil {
+				tx.Rollback()
+				panic(err2)
+			}
+
+			continue
 		}
 
 		// TODO: save artifacts

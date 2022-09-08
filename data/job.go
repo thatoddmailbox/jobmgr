@@ -62,8 +62,8 @@ func MarkJobCompleted(tx *sql.Tx, job *Job) error {
 	return nil
 }
 
-func MarkJobFailed(job *Job) error {
-	_, err := DB.Exec("UPDATE jobs SET status = ?, completed = ? WHERE id = ?", JobStatusFailed, time.Now().Unix(), job.ID)
+func MarkJobFailed(tx *sql.Tx, job *Job) error {
+	_, err := tx.Exec("UPDATE jobs SET status = ?, completed = ? WHERE id = ?", JobStatusFailed, time.Now().Unix(), job.ID)
 	if err != nil {
 		return err
 	}
