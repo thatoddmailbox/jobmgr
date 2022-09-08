@@ -16,7 +16,7 @@ const (
 )
 
 type Job struct {
-	ID         string
+	ID         int
 	Status     JobStatus
 	Priority   int
 	Name       string
