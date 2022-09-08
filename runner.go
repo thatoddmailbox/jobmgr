@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -15,7 +16,7 @@ import (
 
 const artifactsDirName = "artifacts"
 
-func runJob(job *data.Job) (string, string, error) {
+func runJob(job *data.Job, parameters map[string]string) (string, string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return "", "", err
@@ -33,6 +34,28 @@ func runJob(job *data.Job) (string, string, error) {
 		}
 
 		return "", "", err
+	}
+
+	env := []string{}
+	for _, p := range jobspec.Parameter {
+		rawValue, exists := parameters[p.Name]
+		if !exists {
+			// TODO: default values?
+			return "", "", fmt.Errorf("parameter '%s' is required but not set", p.Name)
+		}
+
+		value, ok := p.ParseValue(rawValue)
+		if !ok {
+			return "", "", fmt.Errorf("parameter '%s' has invalid value '%s'", p.Name, value)
+		}
+
+		filteredName := strings.ToUpper(
+			strings.ReplaceAll(p.Name, " ", "_"),
+		)
+
+		envName := "JOBMGR_PARAMETER_" + filteredName
+
+		env = append(env, envName+"="+value)
 	}
 
 	tempDir, err := os.MkdirTemp("", "jobmgr-")
@@ -56,6 +79,7 @@ func runJob(job *data.Job) (string, string, error) {
 		jobspec.Arguments...,
 	)
 	cmd.Dir = jobspec.WorkingDirectory
+	cmd.Env = env
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {

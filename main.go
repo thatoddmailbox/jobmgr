@@ -37,7 +37,7 @@ func main() {
 			panic(err)
 		}
 
-		result, tempDir, err := runJob(job)
+		result, tempDir, err := runJob(job, job.Parameters)
 		if err != nil {
 			// job failed!
 			tx, err2 := data.DB.Begin()
