@@ -80,7 +80,21 @@ func main() {
 
 			relativePath := strings.Replace(path, artifactsDir, "", 1)[1:]
 
-			log.Println(relativePath)
+			f, err := os.Open(path)
+			if err != nil {
+				// bubble up any errors
+				// TODO: should we handle this better?
+				return err
+			}
+			defer f.Close()
+
+			err = data.UploadArtifact(relativePath, f, job)
+			if err != nil {
+				// bubble up any errors
+				// TODO: should we handle this better?
+				return err
+			}
+
 			return nil
 		})
 		if err != nil {
