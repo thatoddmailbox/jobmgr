@@ -13,6 +13,12 @@ type Config struct {
 		Password string
 		Database string
 	}
+	AWS struct {
+		AccessKeyID     string
+		SecretAccessKey string
+		Region          string
+		ArtifactsBucket string
+	}
 }
 
 var Current Config
