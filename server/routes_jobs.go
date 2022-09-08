@@ -7,9 +7,10 @@ import (
 )
 
 type jobResponse struct {
-	Status string   `json:"status"`
-	Job    data.Job `json:"job"`
-	Result *string  `json:"result"`
+	Status    string          `json:"status"`
+	Job       data.Job        `json:"job"`
+	Result    *string         `json:"result"`
+	Artifacts []data.Artifact `json:"artifacts"`
 }
 
 func routeJobsGet(c *requestContext) {
@@ -43,5 +44,15 @@ func routeJobsGet(c *requestContext) {
 		result = &resultString
 	}
 
-	c.WriteJSON(jobResponse{"ok", job, result})
+	var artifacts []data.Artifact
+
+	if job.Status == data.JobStatusCompleted {
+		artifacts, err = data.GetArtifactsForJob(&job)
+		if err != nil {
+			c.InternalServerError(err)
+			return
+		}
+	}
+
+	c.WriteJSON(jobResponse{"ok", job, result, artifacts})
 }
