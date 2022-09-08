@@ -1,11 +1,28 @@
 package data
 
-import "github.com/BurntSushi/toml"
+import (
+	"time"
+
+	"github.com/BurntSushi/toml"
+)
+
+const defaultTimeout time.Duration = 10 * time.Second
 
 type JobSpec struct {
 	Command          string
 	Arguments        []string
 	WorkingDirectory string
+	Timeout          duration
+}
+
+type duration struct {
+	time.Duration
+}
+
+func (d *duration) UnmarshalText(text []byte) error {
+	var err error
+	d.Duration, err = time.ParseDuration(string(text))
+	return err
 }
 
 func ParseJobSpec(filename string) (JobSpec, error) {
@@ -14,6 +31,10 @@ func ParseJobSpec(filename string) (JobSpec, error) {
 	_, err := toml.DecodeFile(filename, &jobspec)
 	if err != nil {
 		return JobSpec{}, err
+	}
+
+	if jobspec.Timeout.Duration == time.Duration(0) {
+		jobspec.Timeout.Duration = defaultTimeout
 	}
 
 	return jobspec, nil

@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/thatoddmailbox/jobmgr/data"
 )
@@ -48,7 +47,7 @@ func runJob(job *data.Job) (string, string, error) {
 		return "", tempDir, err
 	}
 
-	context, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	context, cancel := context.WithTimeout(context.Background(), jobspec.Timeout.Duration)
 	defer cancel()
 
 	cmd := exec.CommandContext(
