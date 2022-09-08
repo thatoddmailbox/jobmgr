@@ -33,5 +33,10 @@ func Init() error {
 		return err
 	}
 
+	err = initAWS()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
