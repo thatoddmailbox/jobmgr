@@ -53,6 +53,7 @@ func runJob(job *data.Job) (string, string, error) {
 	if err != nil {
 		return "", tempDir, err
 	}
+	defer stdoutPipe.Close()
 
 	err = cmd.Start()
 	if err != nil {
