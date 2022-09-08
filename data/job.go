@@ -16,15 +16,26 @@ const (
 )
 
 type Job struct {
-	ID         int
-	Status     JobStatus
-	Priority   int
-	Name       string
-	Parameters map[string]string
-	Created    int
-	Started    *int
-	Completed  *int
-	UserID     int
+	ID          int               `json:"id"`
+	Status      JobStatus         `json:"-"`
+	StatusText_ string            `json:"status"`
+	Priority    int               `json:"priority"`
+	Name        string            `json:"name"`
+	Parameters  map[string]string `json:"parameters"`
+	Created     int               `json:"created"`
+	Started     *int              `json:"started"`
+	Completed   *int              `json:"completed"`
+	UserID      int               `json:"userID"`
+}
+
+func hydrateJob(j Job) Job {
+	j.StatusText_ = map[JobStatus]string{
+		JobStatusQueued:    "queued",
+		JobStatusStarted:   "started",
+		JobStatusCompleted: "completed",
+		JobStatusFailed:    "failed",
+	}[j.Status]
+	return j
 }
 
 func GetNextJobInQueue() (*Job, error) {
@@ -49,6 +60,8 @@ func GetNextJobInQueue() (*Job, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	job = hydrateJob(job)
 
 	return &job, nil
 }
