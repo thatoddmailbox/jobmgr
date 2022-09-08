@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"io"
 	"io/fs"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/thatoddmailbox/jobmgr/data"
 )
@@ -46,7 +48,14 @@ func runJob(job *data.Job) (string, string, error) {
 		return "", tempDir, err
 	}
 
-	cmd := exec.Command(jobspec.Command, jobspec.Arguments...)
+	context, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(
+		context,
+		jobspec.Command,
+		jobspec.Arguments...,
+	)
 	cmd.Dir = jobspec.WorkingDirectory
 
 	stdoutPipe, err := cmd.StdoutPipe()
