@@ -9,6 +9,7 @@ import (
 type jobResponse struct {
 	Status string   `json:"status"`
 	Job    data.Job `json:"job"`
+	Result *string  `json:"result"`
 }
 
 func routeJobsGet(c *requestContext) {
@@ -30,5 +31,17 @@ func routeJobsGet(c *requestContext) {
 		return
 	}
 
-	c.WriteJSON(jobResponse{"ok", job})
+	var result *string
+
+	if job.Status == data.JobStatusCompleted || job.Status == data.JobStatusFailed {
+		resultString, err := data.GetResultForJob(&job)
+		if err != nil {
+			c.InternalServerError(err)
+			return
+		}
+
+		result = &resultString
+	}
+
+	c.WriteJSON(jobResponse{"ok", job, result})
 }
