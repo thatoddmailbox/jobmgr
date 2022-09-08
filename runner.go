@@ -70,6 +70,8 @@ func runJob(job *data.Job, parameters map[string]string) (string, string, error)
 		return "", tempDir, err
 	}
 
+	env = append(env, "JOBMGR_ARTIFACTS_DIR="+artifactsDir)
+
 	context, cancel := context.WithTimeout(context.Background(), jobspec.Timeout.Duration)
 	defer cancel()
 
