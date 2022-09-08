@@ -13,6 +13,8 @@ type JobSpec struct {
 	Arguments        []string
 	WorkingDirectory string
 	Timeout          duration
+
+	Parameter []JobSpecParameter
 }
 
 type duration struct {
@@ -35,6 +37,13 @@ func ParseJobSpec(filename string) (JobSpec, error) {
 
 	if jobspec.Timeout.Duration == time.Duration(0) {
 		jobspec.Timeout.Duration = defaultTimeout
+	}
+
+	for _, p := range jobspec.Parameter {
+		err = p.CheckValidType()
+		if err != nil {
+			return JobSpec{}, err
+		}
 	}
 
 	return jobspec, nil
