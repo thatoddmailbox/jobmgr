@@ -1,8 +1,13 @@
 package main
 
 import (
+	"errors"
+	"io"
+	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/thatoddmailbox/jobmgr/data"
 )
@@ -10,19 +15,59 @@ import (
 const artifactsDirName = "artifacts"
 
 func runJob(job *data.Job) (string, string, error) {
-	wd, err := os.MkdirTemp("", "jobmgr-")
+	wd, err := os.Getwd()
 	if err != nil {
 		return "", "", err
 	}
 
-	artifactsDir := filepath.Join(wd, artifactsDirName)
+	if strings.ContainsAny(job.Name, "./\\ ") {
+		return "", "", errors.New("invalid job name")
+	}
+
+	jobspecPath := filepath.Join(wd, "jobspecs", job.Name+".toml")
+	jobspec, err := data.ParseJobSpec(jobspecPath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return "", "", errors.New("job does not exist")
+		}
+
+		return "", "", err
+	}
+
+	tempDir, err := os.MkdirTemp("", "jobmgr-")
+	if err != nil {
+		return "", "", err
+	}
+
+	artifactsDir := filepath.Join(tempDir, artifactsDirName)
 
 	err = os.Mkdir(artifactsDir, 0777)
 	if err != nil {
 		return "", "", err
 	}
 
-	// TODO: run the job here :)s
+	cmd := exec.Command(jobspec.Command, jobspec.Arguments...)
+	cmd.Dir = jobspec.WorkingDirectory
 
-	return ":)", wd, nil
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return "", "", err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return "", "", err
+	}
+
+	stdout, err := io.ReadAll(stdoutPipe)
+	if err != nil {
+		return "", "", err
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		return "", "", err
+	}
+
+	return string(stdout), tempDir, nil
 }
