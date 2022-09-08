@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"encoding/json"
 	"time"
 )
@@ -52,8 +53,8 @@ func GetNextJobInQueue() (*Job, error) {
 	return &job, nil
 }
 
-func MarkJobCompleted(job *Job) error {
-	_, err := DB.Exec("UPDATE jobs SET status = ?, completed = ? WHERE id = ?", JobStatusCompleted, time.Now().Unix(), job.ID)
+func MarkJobCompleted(tx *sql.Tx, job *Job) error {
+	_, err := tx.Exec("UPDATE jobs SET status = ?, completed = ? WHERE id = ?", JobStatusCompleted, time.Now().Unix(), job.ID)
 	if err != nil {
 		return err
 	}
