@@ -38,6 +38,32 @@ func hydrateJob(j Job) Job {
 	return j
 }
 
+func GetJobByID(id int) (Job, error) {
+	rows, err := DB.Query("SELECT id, status, priority, name, parameters, created, started, completed, userID FROM jobs WHERE id = ?", id)
+	if err != nil {
+		return Job{}, err
+	}
+
+	defer rows.Close()
+	if !rows.Next() {
+		return Job{}, ErrNotFound
+	}
+
+	job := Job{}
+	parameterString := ""
+	err = rows.Scan(&job.ID, &job.Status, &job.Priority, &job.Name, &parameterString, &job.Created, &job.Started, &job.Completed, &job.UserID)
+	if err != nil {
+		return Job{}, err
+	}
+
+	err = json.Unmarshal([]byte(parameterString), &job.Parameters)
+	if err != nil {
+		return Job{}, err
+	}
+
+	return hydrateJob(job), nil
+}
+
 func GetNextJobInQueue() (*Job, error) {
 	rows, err := DB.Query("SELECT id, status, priority, name, parameters, created, started, completed, userID FROM jobs WHERE status = 0 ORDER BY priority ASC, created ASC LIMIT 1")
 	if err != nil {
