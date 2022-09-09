@@ -51,6 +51,26 @@ func getKeyForArtifact(a *Artifact) string {
 	return strconv.Itoa(a.JobID) + "/" + a.UUID
 }
 
+func GetArtifactByID(id int) (Artifact, error) {
+	rows, err := DB.Query("SELECT id, name, mime, size, uuid, created, jobID FROM artifacts WHERE id = ?", id)
+	if err != nil {
+		return Artifact{}, err
+	}
+
+	defer rows.Close()
+	if !rows.Next() {
+		return Artifact{}, ErrNotFound
+	}
+
+	artifact := Artifact{}
+	err = rows.Scan(&artifact.ID, &artifact.Name, &artifact.MIME, &artifact.Size, &artifact.UUID, &artifact.Created, &artifact.JobID)
+	if err != nil {
+		return Artifact{}, err
+	}
+
+	return artifact, nil
+}
+
 func GetArtifactsForJob(job *Job) ([]Artifact, error) {
 	rows, err := DB.Query("SELECT id, name, mime, size, uuid, created, jobID FROM artifacts WHERE jobID = ?", job.ID)
 	if err != nil {
