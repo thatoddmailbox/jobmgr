@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strconv"
@@ -49,6 +50,37 @@ var mimeMap = map[string]string{
 
 func getKeyForArtifact(a *Artifact) string {
 	return strconv.Itoa(a.JobID) + "/" + a.UUID
+}
+
+func BuildURLForArtifact(a *Artifact) (string, error) {
+	key := getKeyForArtifact(a)
+
+	filterChars := []string{
+		",", "&", "!", "?", "/", "\\", "@", ":", "%",
+	}
+	normalizedName := a.Name
+	for _, filterChar := range filterChars {
+		normalizedName = strings.ReplaceAll(normalizedName, filterChar, "-")
+	}
+	normalizedName = strings.TrimSpace(normalizedName)
+
+	contentDisposition := fmt.Sprintf(
+		"inline; filename=\"%s\"",
+		strings.ReplaceAll(normalizedName, "\"", "\\\""),
+	)
+
+	presignedClient := s3.NewPresignClient(s3Client)
+	result, err := presignedClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket:                     &config.Current.AWS.ArtifactsBucket,
+		Key:                        &key,
+		ResponseContentDisposition: &contentDisposition,
+		ResponseContentType:        &a.MIME,
+	}, s3.WithPresignExpires(2*time.Hour))
+	if err != nil {
+		return "", err
+	}
+
+	return result.URL, nil
 }
 
 func GetArtifactByID(id int) (Artifact, error) {

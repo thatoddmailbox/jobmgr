@@ -46,7 +46,7 @@ func initRoutes() {
 
 	router.GET("/", route(routeMain))
 
-	router.GET("/artifacts/get", route(routeMain))
+	router.GET("/artifacts/download", route(routeArtifactsDownload))
 
 	router.GET("/jobs/get", route(routeJobsGet))
 	router.POST("/jobs/start", route(routeMain))
