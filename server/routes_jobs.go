@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/thatoddmailbox/jobmgr/data"
@@ -55,4 +56,33 @@ func routeJobsGet(c *requestContext) {
 	}
 
 	c.WriteJSON(jobResponse{"ok", job, result, artifacts})
+}
+
+func routeJobsStart(c *requestContext) {
+	name := c.r.FormValue("name")
+	parameters := c.r.FormValue("parameters")
+	priority := 50
+
+	if name == "" || parameters == "" {
+		c.WriteJSON(errorResponse{"error", "missing_params"})
+		return
+	}
+
+	// TODO: check job name?
+
+	var parametersMap map[string]string
+	err := json.Unmarshal([]byte(parameters), &parametersMap)
+	if err != nil {
+		c.WriteJSON(errorResponse{"error", "invalid_params"})
+		return
+	}
+
+	// TODO: userID
+	jobID, err := data.EnqueueJob(name, parametersMap, priority, 1)
+	if err != nil {
+		c.InternalServerError(err)
+		return
+	}
+
+	c.WriteJSON(createdResponse{"ok", jobID})
 }

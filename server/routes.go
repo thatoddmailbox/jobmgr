@@ -49,7 +49,7 @@ func initRoutes() {
 	router.GET("/artifacts/download", route(routeArtifactsDownload))
 
 	router.GET("/jobs/get", route(routeJobsGet))
-	router.POST("/jobs/start", route(routeMain))
+	router.POST("/jobs/start", route(routeJobsStart))
 
 	http.Handle("/", router)
 }
