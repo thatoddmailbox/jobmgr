@@ -9,6 +9,7 @@ import (
 
 	"github.com/thatoddmailbox/jobmgr/config"
 	"github.com/thatoddmailbox/jobmgr/data"
+	"github.com/thatoddmailbox/jobmgr/server"
 )
 
 func main() {
@@ -24,13 +25,31 @@ func main() {
 		panic(err)
 	}
 
+	// TODO: theoretically in the future we'd want separate workers and servers
+	// but this is okay for now i guess
+	go server.StartServer()
+
 	for {
+		data.JobQueueNotification.L.Lock()
+
 		job, err := data.GetNextJobInQueue()
 		if err != nil {
 			panic(err)
 		}
 
-		log.Printf("%+v", job)
+		if job == nil {
+			// there's no job available
+			// wait for us to get notified about something being queued
+			data.JobQueueNotification.Wait()
+			data.JobQueueNotification.L.Unlock()
+
+			// note that we're doing this in a loop
+			// it's possible for Wait() to return without the condition being true
+			// in that case, we'll just check the db, see that there's nothing, and go back to sleep
+			continue
+		}
+
+		data.JobQueueNotification.L.Unlock()
 
 		err = data.MarkJobStarted(job)
 		if err != nil {
@@ -129,7 +148,5 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
-		break
 	}
 }

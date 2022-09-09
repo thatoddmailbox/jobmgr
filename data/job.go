@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"encoding/json"
+	"sync"
 	"time"
 )
 
@@ -27,6 +28,8 @@ type Job struct {
 	Completed   *int              `json:"completed"`
 	UserID      int               `json:"userID"`
 }
+
+var JobQueueNotification *sync.Cond = sync.NewCond(&sync.Mutex{})
 
 func hydrateJob(j Job) Job {
 	j.StatusText_ = map[JobStatus]string{
@@ -57,7 +60,15 @@ func EnqueueJob(name string, parameters map[string]string, priority int, userID 
 		return 0, err
 	}
 
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	// wake up the main queue
+	JobQueueNotification.Broadcast()
+
+	return id, err
 }
 
 func GetJobByID(id int) (Job, error) {
