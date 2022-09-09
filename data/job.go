@@ -38,6 +38,28 @@ func hydrateJob(j Job) Job {
 	return j
 }
 
+func EnqueueJob(name string, parameters map[string]string, priority int, userID int) (int64, error) {
+	parameterBytes, err := json.Marshal(parameters)
+	if err != nil {
+		return 0, err
+	}
+
+	result, err := DB.Exec(
+		"INSERT INTO jobs(status, priority, name, parameters, created, userID) VALUES(?, ?, ?, ?, ?, ?)",
+		JobStatusQueued,
+		priority,
+		name,
+		parameterBytes,
+		time.Now().Unix(),
+		userID,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return result.LastInsertId()
+}
+
 func GetJobByID(id int) (Job, error) {
 	rows, err := DB.Query("SELECT id, status, priority, name, parameters, created, started, completed, userID FROM jobs WHERE id = ?", id)
 	if err != nil {
