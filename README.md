@@ -48,7 +48,7 @@ ArtifactsBucket = "bucket-name-here"
 
 You will need to update the [Database] section with your MySQL connection information, and the [AWS} section with your AWS credentials and bucket name.
 
-> **Info:**
+> **Note**
 > You should create a new user in AWS IAM with access keys, and delegate bucket access to that user. For more information, see the [AWS IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started.html).
 
 Once you've done that, use a terminal to start your jobmgr executable from its working directory. THat's it! You can now add a jobspec and start a job.
