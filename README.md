@@ -1,10 +1,10 @@
 # jobmgr
-A program to queue, manage, and run jobs that are submitted to it. For example, you might have a computer with a GPU that you want to send work to. jobmgr will queue up the work, run each job one-by-one, and make the results available over an HTTP API.
+A program to queue, manage, and run jobs that are submitted to it. For example, you might have a computer with a GPU that you want to send work to. jobmgr will queue up the work, run each job one-by-one, and make the results available over an HTTP API. Tested to work on Windows and Linux.
 
 ## Overview
 All work must be submitted as a *job*. Each job has a name and one or more parameters. The name will be used to look up a *jobspec*, which describes how to run the job.
 
-When a client submits a job, jobmgr will follow the instructions in your jobspec. The output of the job will be stored and made available to the client.
+When a client submits a job, jobmgr will follow the instructions in your jobspec. The output of the job (the *results*) will be stored and made available to the client.
 
 Sometimes, your job might generate something other than text; for example, an image, video, or sound file. These are referred to as *artifacts*. Your job can write these output files in an `artifacts` folder, which is created in a new temporary directory each time the job is run. When the job is finished, jobmgr will automatically upload all its artifacts to an Amazon S3 bucket, and provide links to the client.
 
@@ -30,7 +30,7 @@ Sometimes, your job might generate something other than text; for example, an im
 ### Installation and configuration
 From this folder (the one with the README), run `go build`. That should generate a `jobmgr` executable. 
 
-You'll need to decide on a working directory for jobmgr. This will be where your configuration and jobspec files will be. On Linux, this could be `/opt/jobmgr`; on Windows, this could be `C:\jobmgr`. Wherever it is, copy the executable you just build to that folder. Then, create a `config.toml` file with the following contents:
+You'll need to decide on a working directory for jobmgr. This will be where your configuration and jobspec files will be. On Linux, this could be `/opt/jobmgr`. On Windows, this could be `C:\jobmgr`. Wherever it is, copy the executable you just build to that folder. Then, create a `config.toml` file with the following contents:
 
 ```toml
 [Database]
@@ -52,3 +52,9 @@ You will need to update the [Database] section with your MySQL connection inform
 > You should create a new user in AWS IAM with access keys, and delegate bucket access to that user. For more information, see the [AWS IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started.html).
 
 Once you've done that, use a terminal to start your jobmgr executable from its working directory. THat's it! You can now add a jobspec and start a job.
+
+## Jobspecs
+TODO
+
+## HTTP API
+TODO
