@@ -30,7 +30,7 @@ Sometimes, your job might generate something other than text; for example, an im
 ### Installation and configuration
 From this folder (the one with the README), run `go build`. That should generate a `jobmgr` executable. 
 
-You'll need to decide on a working directory for jobmgr. This will be where your configuration and jobspec files will be. On Linux, this could be `/opt/jobmgr`. On Windows, this could be `C:\jobmgr`. Wherever it is, copy the executable you just build to that folder. Then, create a `config.toml` file with the following contents:
+You'll need to decide on a working directory for jobmgr. This will be where your configuration and jobspec files will be. On Linux, this could be `/opt/jobmgr`. On Windows, this could be `C:\jobmgr`. Wherever it is, copy the executable you just built to that folder. Then, create a `config.toml` file with the following contents:
 
 ```toml
 [Database]
@@ -54,6 +54,34 @@ You will need to update the [Database] section with your MySQL connection inform
 Once you've done that, use a terminal to start your jobmgr executable from its working directory. THat's it! You can now add a jobspec and start a job.
 
 ## Jobspecs
+A jobspec describes how to run a job. It's a TOML file with various configuration options, with `Command` being the only required one.
+
+Here is a sample jobspec, along with descriptions for each parameter:
+```toml
+Command = "./somecoolscript.sh"
+Arguments = ["--some-useful-flag"]
+WorkingDirectory = "/opt/something/"
+Timeout = "1m30s"
+
+[[Parameter]]
+Name = "message"
+Type = "string"
+
+[[Parameter]]
+Name = "other-option"
+Type = "string"
+```
+
+| Name | Description |
+| ---- | ----------- |
+| Command | The executable to run. This must ONLY be the executable name, EXCLUDING any arguments! |
+| Arguments | A list of arguments to pass to the executable when it's run. |
+| WorkingDirectory | The working directory to use when launching the executable. If omitted, defaults to the job's temporary directory. |
+| Timeout | The maximum runtime of a job, in [Go duration string format](https://pkg.go.dev/time#ParseDuration). If omitted, defaults to 10 seconds. |
+
+In addition to these options, you may specify one or more parameters for the job, as shown above. Each parameter has a Name and a Type. Valid parameter types are "string" and "int". The values of these parameters are set by whoever submits the job, and are made available as environment variables. See the "Environment" section below for more details.
+
+### Environment
 TODO
 
 ## HTTP API
