@@ -30,6 +30,7 @@ Sometimes, your job might generate something other than text; for example, an im
 ### Installation and configuration
 > **Warning**
 > jobmgr currently performs no authentication. You should use a firewall or some other mechanism to ensure the HTTP server is not exposed to the Internet.
+>
 > If you need to submit jobs from another machine, try SSH port tunneling, a VPN, or [Tailscale](https://tailscale.com/).
 
 From this folder (the one with the README), run `go build`. That should generate a `jobmgr` executable. 
@@ -50,12 +51,12 @@ Region = "us-east-2"
 ArtifactsBucket = "bucket-name-here"
 ```
 
-You will need to update the [Database] section with your MySQL connection information, and the [AWS} section with your AWS credentials and bucket name.
+You will need to update the `[Database]` section with your MySQL connection information, and the `[AWS]` section with your AWS credentials and bucket name.
 
 > **Note**
 > You should create a new user in AWS IAM with access keys, and delegate bucket access to that user. For more information, see the [AWS IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started.html).
 
-Once you've done that, use a terminal to start your jobmgr executable from its working directory. THat's it! You can now add a jobspec and start a job.
+Once you've done that, use a terminal to start your jobmgr executable from its working directory. That's it! You can now add a jobspec and start a job.
 
 ## Jobspecs
 A jobspec describes how to run a job. It's a TOML file with various configuration options, with `Command` being the only required one.
