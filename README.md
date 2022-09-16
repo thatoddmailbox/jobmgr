@@ -104,4 +104,82 @@ Apart from the `JOBMGR` environment variables described above, by default no oth
 > Missing environment variables can be a bigger problem on Windows systems. If your job behaves weirdly when run from jobmgr but works when run directly, there probably is a missing environment variable. You can use the `set` (Command Prompt) or `dir env:` (PowerShell) commands to list all environment variables. Then, try running your job with `PreserveEnvVars` set to the entire list, and slowly remove environment variables until your job fails again.
 
 ## HTTP API
-TODO
+The HTTP API is pretty simple. There's currently no authentication or authoriation checks, and a small number of endpoints.
+
+All GET endpoints take their parameters in the query string, and all POST endpoints take their parameters as formencoded values. Responses are always JSON objects unless otherwise specified.
+
+### GET /jobs/get
+Gets information about a job.
+
+#### Parameters
+* `id`: the ID of the job
+
+#### Response
+* `status` will be `"ok"`
+* `job` will contain some information about the job
+	* `id` is the name of the job
+	* `status` is either `"queued"`, `"started"`, `"completed"`, or `"failed"`
+	* `priority` is the priority of the job
+	* `name` is the name of the job
+	* `parameters` contains the parameters of the job
+	* `created` is the UNIX timestamp of when the job was created
+	* `started` is either `null` or the UNIX timestamp of when the job was started
+	* `completed` is either `null` or the UNIX timestamp of when the job was completed
+	* `userID` is the ID of the user who started the job
+* `result` is either `null` (if the job hasn't been run) or the output of the job (if it has been run)
+* `artifacts` is either `null` (if the job hasn't been run) or the a list of the job's artifacts (if it has been run)
+	* `id` is the name of the artifact
+	* `name` is the name of the artifact
+	* `mime` is the MIME type of the artifact
+	* `size` is the size in bytes of the artifact
+	* `uuid` is the the UUID of the artifact (you should not rely on this field's contents)
+	* `created` is the UNIX timestamp of when the artifact was created
+	* `jobID` is the ID of the job corresponding to the artifact
+
+For example:
+```json
+{
+	"status": "ok",
+	"job": {
+		"id": 17,
+		"status": "completed",
+		"priority": 50,
+		"name": "image-generator",
+		"parameters": {
+			"message": "hello"
+		},
+		"created": 1662745267,
+		"started": 1662745267,
+		"completed": 1662745267,
+		"userID": 1
+	},
+	"result": "",
+	"artifacts": [
+		{
+			"id": 12,
+			"name": "result.png",
+			"mime": "image/png",
+			"size": 3874,
+			"uuid": "1f4344e2-01ff-4744-aaab-8e3ff2c2fbc8",
+			"created": 1662745267,
+			"jobID": 17
+		}
+	]
+}
+```
+
+### POST /jobs/start
+Starts a new job.
+
+#### Parameters
+* `name`: the name of the job to run (should match a jobspec TOML file on disk)
+* `parameters`: a stringified JSON object with all parameters and their values. Note that all values must be string objects, even if the parameter's type is set to `int`!
+
+#### Response
+* `status` will be `"ok"`
+* `created` will be the ID of the job, which can be used with /jobs/get
+
+For example:
+```json
+{"status": "ok", "created": 1}
+```
