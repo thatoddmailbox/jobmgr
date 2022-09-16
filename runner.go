@@ -37,6 +37,10 @@ func runJob(job *data.Job, parameters map[string]string) (string, string, error)
 	}
 
 	env := []string{}
+	for _, name := range jobspec.PreserveEnvVars {
+		env = append(env, name+"="+os.Getenv(name))
+	}
+
 	for _, p := range jobspec.Parameter {
 		rawValue, exists := parameters[p.Name]
 		if !exists {

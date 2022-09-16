@@ -12,6 +12,7 @@ type JobSpec struct {
 	Command          string
 	Arguments        []string
 	WorkingDirectory string
+	PreserveEnvVars  []string
 	Timeout          duration
 
 	Parameter []JobSpecParameter
