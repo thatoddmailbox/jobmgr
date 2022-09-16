@@ -87,7 +87,13 @@ Type = "string"
 In addition to these options, you may specify one or more parameters for the job, as shown above. Each parameter has a Name and a Type. Valid parameter types are "string" and "int". The values of these parameters are set by whoever submits the job, and are made available as environment variables. See the "Environment" section below for more details.
 
 ### Environment
-TODO
+When your job is started, jobmgr creates a new temporary directory. This will be the working directory for your job (unless you override it in the jobspec). The contents of this directory are cleaned up when the job is finished, so you can write any temporary files or output there.
+
+Inside the temporary directory, jobmgr creates another directory called `artifacts`. Anything your job writes into `artifacts` will be uploaded to Amazon S3 and made available to the client who submitted the job. This way, you can produce output files (images, music, videos, etc.) in addition to text output.
+
+For convenience, the full path to the `artifacts` directory is also made available in the environment variable `JOBMGR_ARTIFACTS_DIR`.
+
+In addition, if you specified any parameters for the job, those parameter's values will be made available as environment variables. The parameter's name will be normalized. For example, a parameter named `message` would be available in the environment variable `JOBMGR_PARAMETER_MESSAGE`.
 
 ## HTTP API
 TODO
