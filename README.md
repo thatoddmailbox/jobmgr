@@ -28,6 +28,10 @@ Sometimes, your job might generate something other than text; for example, an im
 * Amazon S3 bucket
 
 ### Installation and configuration
+> **Warning**
+> jobmgr currently performs no authentication. You should use a firewall or some other mechanism to ensure the HTTP server is not exposed to the Internet.
+> If you need to submit jobs from another machine, try SSH port tunneling, a VPN, or [Tailscale](https://tailscale.com/).
+
 From this folder (the one with the README), run `go build`. That should generate a `jobmgr` executable. 
 
 You'll need to decide on a working directory for jobmgr. This will be where your configuration and jobspec files will be. On Linux, this could be `/opt/jobmgr`. On Windows, this could be `C:\jobmgr`. Wherever it is, copy the executable you just built to that folder. Then, create a `config.toml` file with the following contents:
