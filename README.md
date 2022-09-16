@@ -104,7 +104,7 @@ Apart from the `JOBMGR` environment variables described above, by default no oth
 > Missing environment variables can be a bigger problem on Windows systems. If your job behaves weirdly when run from jobmgr but works when run directly, there probably is a missing environment variable. You can use the `set` (Command Prompt) or `dir env:` (PowerShell) commands to list all environment variables. Then, try running your job with `PreserveEnvVars` set to the entire list, and slowly remove environment variables until your job fails again.
 
 ## HTTP API
-The HTTP API is pretty simple. There's currently no authentication or authoriation checks, and a small number of endpoints.
+The HTTP API is pretty simple. There's currently no authentication or authorization checks, and a small number of endpoints.
 
 All GET endpoints take their parameters in the query string, and all POST endpoints take their parameters as formencoded values. Responses are always JSON objects unless otherwise specified.
 
@@ -193,5 +193,8 @@ Starts a new job.
 
 For example:
 ```json
-{"status": "ok", "created": 1}
+{
+	"status": "ok",
+	"created": 1
+}
 ```
