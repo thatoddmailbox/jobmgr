@@ -66,6 +66,7 @@ Here is a sample jobspec, along with descriptions for each parameter:
 Command = "./somecoolscript.sh"
 Arguments = ["--some-useful-flag"]
 WorkingDirectory = "/opt/something/"
+PreserveEnvVars = ["PATH"]
 Timeout = "1m30s"
 
 [[Parameter]]
@@ -82,6 +83,7 @@ Type = "string"
 | Command | The executable to run. This must ONLY be the executable name, EXCLUDING any arguments! |
 | Arguments | A list of arguments to pass to the executable when it's run. |
 | WorkingDirectory | The working directory to use when launching the executable. If omitted, defaults to the job's temporary directory. |
+| PreserveEnvVars | A list of environment variables to preserve when running the job. By default, this is empty and so no environment variables are set, apart from those described in the "Environment" section below. |
 | Timeout | The maximum runtime of a job, in [Go duration string format](https://pkg.go.dev/time#ParseDuration). If omitted, defaults to 10 seconds. |
 
 In addition to these options, you may specify one or more parameters for the job, as shown above. Each parameter has a Name and a Type. Valid parameter types are "string" and "int". The values of these parameters are set by whoever submits the job, and are made available as environment variables. See the "Environment" section below for more details.
@@ -94,6 +96,12 @@ Inside the temporary directory, jobmgr creates another directory called `artifac
 For convenience, the full path to the `artifacts` directory is also made available in the environment variable `JOBMGR_ARTIFACTS_DIR`.
 
 In addition, if you specified any parameters for the job, those parameter's values will be made available as environment variables. The parameter's name will be normalized. For example, a parameter named `message` would be available in the environment variable `JOBMGR_PARAMETER_MESSAGE`.
+
+#### Preserving environment variables
+Apart from the `JOBMGR` environment variables described above, by default no other environment variables are set. However, you sometimes want a job to access an environment variable; for example, you might need to access something in the `PATH`. You can do this by setting the `PreserveEnvVars` jobspec option to a list of environment variables to preserve.
+
+> **Note**
+> Missing environment variables can be a bigger problem on Windows systems. If your job behaves weirdly when run from jobmgr but works when run directly, there probably is a missing environment variable. You can use the `set` (Command Prompt) or `dir env:` (PowerShell) commands to list all environment variables. Then, try running your job with `PreserveEnvVars` set to the entire list, and slowly remove environment variables until your job fails again.
 
 ## HTTP API
 TODO
