@@ -108,6 +108,18 @@ The HTTP API is pretty simple. There's currently no authentication or authoriati
 
 All GET endpoints take their parameters in the query string, and all POST endpoints take their parameters as formencoded values. Responses are always JSON objects unless otherwise specified.
 
+### GET /artifacts/download
+Redirects to a URL where you can download the artifact.
+
+#### Parameters
+* `id`: the ID of the artifact
+
+#### Response
+The response will be a 307 Temporary Redirect to a URL where you can download the artifact.
+
+> **Warning**
+> The provided URL has an expiry date. You should NOT rely on it working long-term. If you do need long-term access to the artifact, you should download it from the provided URL and upload it to some other hosting service.
+
 ### GET /jobs/get
 Gets information about a job.
 
